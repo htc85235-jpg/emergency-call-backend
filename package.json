@@ -1,0 +1,17 @@
+{
+  "name": "emergency-call-backend",
+  "version": "1.0.0",
+  "description": "Backend for emergency call feature - receives call requests and sends FCM push to phone",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "firebase-admin": "^12.0.0",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
