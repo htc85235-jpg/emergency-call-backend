@@ -1,27 +1,22 @@
 # Emergency Call Backend
 
-Tiny Node.js/Express backend that receives emergency call requests from your website and forwards them as high-priority FCM push notifications to your Android phone.
+Serverless backend (Vercel) for the Emergency Call app. Provides:
 
-## Endpoints
+- **`POST /api/register-token`** — phone app calls this on launch to register its FCM token
+- **`GET /api/device-status`** — quick check whether a device is registered
+- **`POST /api/emergency-call`** — `{ "callerName": "Mom" }` → sends a high-priority FCM push to the phone
+- **`GET /api/manifest`** — Expo Updates protocol manifest endpoint (returns 204 if no OTA published, 200 + manifest if there is)
+- **`GET /api/bundle`** — serves the OTA JS bundle
+- **`POST /api/set-bundle`** — admin endpoint to publish a new OTA bundle
 
-- `GET /` — health check
-- `POST /register-token` — register phone's FCM token (called by the mobile app)
-- `GET /device-status` — check if a device is currently registered
-- `POST /emergency-call` — trigger an emergency call push to the phone
+## Required environment variables (set in Vercel)
 
-## Required Environment Variables
+| Variable | Type | Purpose |
+|---|---|---|
+| `FIREBASE_SERVICE_ACCOUNT_B64` | encrypted | Base64-encoded Firebase service account JSON (with `cloudmessaging.messages.create` permission) |
+| `OTA_UPDATE_PASSPHRASE` | encrypted | Passphrase required by `/api/set-bundle` (any string you choose) |
+| `VERCEL_TOKEN` | encrypted | Vercel API token (used by `/api/set-bundle` to update the `OTA_BUNDLE_JSON` env var) |
+| `VERCEL_PROJECT_ID` | plain | Vercel project ID of this backend (visible in project Settings → General) |
+| `VERCEL_TEAM_ID` | plain | Optional, only if your project is under a team (in the URL `vercel.com/<team>/...`) |
 
-- `FIREBASE_SERVICE_ACCOUNT_B64` — base64-encoded Firebase service account JSON
-- `PORT` (auto-set by Render)
-
-## Local Development
-
-```bash
-# Encode your service account JSON to base64
-base64 -i firebase-service-account.json | tr -d '\n' > /tmp/b64.txt
-
-# Set env var and run
-export FIREBASE_SERVICE_ACCOUNT_B64=$(cat /tmp/b64.txt)
-npm install
-npm start
-```
+The OTA bundle is stored in the env var `OTA_BUNDLE_JSON` (type `plain` so the manifest endpoint can read it at runtime).
