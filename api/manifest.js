@@ -67,6 +67,12 @@ module.exports = (req, res) => {
     return res.status(204).end();
   }
 
+  // Build the bundle URL dynamically from the incoming request host so this works
+  // under any Vercel alias (emergency-backend-eight.vercel.app, custom domain, etc.).
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'emergency-backend-eight.vercel.app';
+  const bundleUrl = `${proto}://${host}/api/bundle`;
+
   // Hash must match what the bundle endpoint will serve (sha256 of bundle.code, base64).
   const hash = bundle.hash || crypto.createHash('sha256').update(bundle.code).digest('base64');
 
@@ -79,7 +85,7 @@ module.exports = (req, res) => {
     launchAsset: {
       key: 'bundle.js',
       contentType: 'application/javascript',
-      url: 'https://emergency-backend-eight.vercel.app/api/bundle',
+      url: bundleUrl,
       hash,
       extra: {
         createdAt: bundle.createdAt || new Date().toISOString(),
